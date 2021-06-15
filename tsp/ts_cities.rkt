@@ -59,7 +59,7 @@
                         (lambda (button event)
                           (cond [(empty? cities) void]
                                 [else
-                                 (set! paths (ga-path cities 100 1000))
+                                 (set! paths (ga-path cities 1000 500))
                                  (send ts-canvas refresh)
                                  ]
                           ))]

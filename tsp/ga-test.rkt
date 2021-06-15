@@ -1,6 +1,8 @@
 #lang racket/gui
 
+(require rackunit "common.rkt")
 (require rackunit "ga.rkt")
+
 
 (define (test-city-locations count)
   (build-list count (lambda (x)
@@ -13,32 +15,47 @@
 (check-equal? (list-ref cities 19) #(19 38 38) "city data check 2")
 
 ; population creation - includes shuffle so hard to validate
-(define test-pop (create-population 100 20))
-(check-equal? (length test-pop) 100 "population length")
+(define test-pop (create-population 1000 20))
+(check-equal? (length test-pop) 1000 "population length")
 (check-equal? (length (list-ref test-pop 1)) 21 "agent length")
 
 ;check calc-distance
-(define distances (calc-distances test-pop cities))
-;(list-ref distances 0)
-(check-equal? (length distances) 100 "distances length")
-(check-equal? (length (car (list-ref distances 1))) 21 "distances agent length")
-(check-true (number? (cdr (list-ref distances 1))) "distances agent distance calc")
+;(define distances (calc-distances test-pop cities))
+;;(list-ref distances 0)
+;(check-equal? (length distances) 100 "distances length")
+;(check-equal? (length (car (list-ref distances 1))) 21 "distances agent length")
+;(check-true (number? (cdr (list-ref distances 1))) "distances agent distance calc")
 
 ;check sorting
-(define sorted-pop (sort-asc distances))
-(check-true (< (cdr (list-ref sorted-pop 0)) (cdr (list-ref sorted-pop 99))))
+;(define sorted-pop (sort-asc distances))
+;(check-true (< (cdr (list-ref sorted-pop 0)) (cdr (list-ref sorted-pop 99))))
 
 ;check creation of the roulette reproduction rule
-(check-equal? (length (take sorted-pop 10)) 10)
-(define weights (roulette-weights (take sorted-pop 10)))
-(check-equal? (length weights) 10 "roulette weights length")
-(define wheel (roulette-wheel (take sorted-pop 10)))
-;run a generation cycle
-(define new-gen (generation-cycle sorted-pop))
-(check-equal? (length new-gen) 100)
+;(check-equal? (length (take sorted-pop 10)) 10)
+;(define weights (roulette-weights (take sorted-pop 10)))
+;(check-equal? (length weights) 10 "roulette weights length")
+;(define wheel (roulette-wheel (take sorted-pop 10)))
+;;run a generation cycle
+;(define new-gen (generation-cycle sorted-pop))
+;(check-equal? (length new-gen) 100)
 
-(define a (list 0 1 2 3 4 5 6 7 8 9 10 0))
-(define b (list 0 10 9 8 7 6 5 4 3 2 1 0))
-a
-(perform-cross-over a b 2 4)
-;(cross-over a b)
+;check cross-overs
+(define a (list 0 1 2 3 4 5 6 7 8 9 0))
+(define b (list 0 9 8 7 6 5 4 3 2 1 0))
+
+(define len-1 (sub1 (length a)))
+
+(check-equal? (single-crossover a b 0) b "single cross over zero cities")
+(check-equal? (single-crossover a b len-1) a "single cross over all cities")
+(check-equal? (single-crossover a b 4) '(0 1 2 3 9 8 7 6 5 4 0) "single cross over four cities")
+
+(check-equal? (dual-crossover a b 0 6) '(0 5 4 3 2 1 6 7 8 9 0) "dual cross over 0:6 cities")
+(check-equal? (dual-crossover a b 6 len-1) '(0 1 2 3 4 5 9 8 7 6 0) "dual cross over 6:-1 cities")
+(check-equal? (dual-crossover a b 2 6) '(0 1 5 4 3 2 6 7 8 9 0) "dual cross over 2:6 cities")
+
+
+;(ga-path cities 1000 100)
+
+(list-ref test-pop 0)
+(indexes->cities (list-ref test-pop 0) cities)
+
