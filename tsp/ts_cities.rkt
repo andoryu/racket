@@ -2,20 +2,31 @@
 (require racket/draw)
 (require racket/include)
 
+(require "common.rkt")
 (require "nn.rkt")
 (require "ga.rkt")
+(require "nn3.rkt")
 
 
 (define cities empty)
 (define paths empty)
 
-(define (city-locations count scale)
-  (for/list ([i count])
-    (vector i (* (random) scale) (* (random) scale))))
+(define frame (new frame% [label "Travelling Salesman Problem"] [width 1000] [height 1000]))
 
-(define frame (new frame% [label "NN"] [width 1000] [height 1000]))
+(define main-pane (new vertical-panel% [parent frame]))
 
-(define hpane (new horizontal-pane% [parent frame]))
+(define hpane (new horizontal-pane% [parent main-pane]))
+
+(define status-bar (new horizontal-pane% [parent main-pane]
+                                         [vert-margin 2]
+                                         [horiz-margin 2]
+                                         [stretchable-height 25]
+                                         )
+  )
+
+(define status (new message% [parent status-bar] [label " "]))
+
+
 
 (define bpanel (new vertical-panel% [parent hpane]
                                     [vert-margin 5]
@@ -25,7 +36,7 @@
 (define city-count (new text-field%
                         [label "Cities"]
                         [parent bpanel]
-                        [init-value "10"]))
+                        [init-value "35"]))
 
 
 (define randomise-button (new button%
@@ -46,6 +57,7 @@
                         (lambda (button event)
                           (cond [(empty? cities) void]
                                 [else
+                                 (send status set-label "Nearest Neighbour")
                                  (set! paths (nn-path cities))
                                  (send ts-canvas refresh)
                                  ]
@@ -59,14 +71,40 @@
                         (lambda (button event)
                           (cond [(empty? cities) void]
                                 [else
+                                 (send status set-label "Genetic Algorithm")
+                                 (set! paths empty)
+                                 (send ts-canvas refresh)
+                                 
                                  (set! paths (ga-path cities 1000 500))
                                  (send ts-canvas refresh)
                                  ]
                           ))]
                        ))
 
-(define ts-canvas (new canvas% [parent hpane]
+(define nn3-button (new button%
+                        [parent bpanel]
+                        [label "Nearest 3 Neighbour"]
+                        [callback
+                         (lambda (button event)
+                           (cond [(empty? cities) void]
+                                 [else
+                                  (send status set-label "Nearest 3 Neighbour")
+                                  (set! paths empty)
+                                  (send ts-canvas refresh)
+
+                                  (set! paths (nn3-path cities))
+                                  (send ts-canvas refresh)
+                                  ]
+                                 )
+                           )
+                         ]
+                        )
+  )
+
+(define ts-canvas (new canvas%
+     [parent hpane]
      [min-width 1000]
+     [min-height 1000]
      [stretchable-width 1000]
      [paint-callback
       (lambda (canvas dc)
